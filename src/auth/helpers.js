@@ -1,0 +1,82 @@
+import cookie from 'js-cookie';
+
+
+// set/save the cookies
+export const setCookie = (key, value) => {
+    if (window !== 'undefined') {
+        cookie.set(key, value, {
+            expires: 2
+        })
+    }
+};
+
+// remove from cookie when signed out
+export const removeCookie = key => {
+    if (window !== 'undefined') {
+        cookie.remove(key, {
+            expires: 2
+        })
+    }
+};
+
+
+// retrieve stored infos from cookie
+export const getCookie = key => {
+    if (window !== 'undefined') {
+        return cookie.get(key)
+    }
+};
+
+// save in localStorage
+export const setLocalStorage = (key, value) => {
+    if (window !== 'undefined') {
+        localStorage.setItem(key, JSON.stringify(value))
+    }
+};
+
+// remove from localStorage
+export const removeLocalStorage = key => {
+    if (window !== 'undefined') {
+        localStorage.removeItem(key)
+    }
+};
+
+// authenticate user by passing data to cookie and localStorage during signin:
+
+export const authenticate = (response, next) => {
+    setCookie('token', response.data.token);
+    setLocalStorage('user', response.data.user);
+    next();
+};
+
+//access user info from localStorage:
+
+export const isAuth = () => {
+    if (window !== 'undefined') {
+        const cookieChecked = getCookie('token')
+        if (cookieChecked) {
+            if (localStorage.getItem('user')) {
+                return JSON.parse(localStorage.getItem('user'))
+            } else {
+                return false;
+            }
+        }
+    }
+};
+
+export const signout = next => {
+    removeCookie('token');
+    removeLocalStorage('user');
+
+    next();
+}
+
+export const updateUser = (res, next) => {
+    console.log('Update user in localStorage helpers', res);
+    if (typeof window !== 'undefined') {
+        let auth = JSON.parse(localStorage.getItem('user'));
+        auth = res.data;
+        localStorage.setItem('user', JSON.stringify(auth))
+    }
+    next();
+}
